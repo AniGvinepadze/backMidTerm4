@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
+import { Company } from 'src/company/company.decorator';
+
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +22,7 @@ export class AuthController {
 
   @Get('current-company')
   @UseGuards(IsAuthGuard)
-  getCurrentCompany(@Req() req) {
-    return this.authService.getCurrentCompany(req.companyId);
+  getCurrentCompany(@Company() companyId) {
+    return this.authService.getCurrentCompany(companyId);
   }
 }

@@ -13,8 +13,24 @@ export class PostsService {
     @InjectModel('company') private companyModel: Model<Company>,
   ) {}
 
-  async create(createPostDto: CreatePostDto) {
-    const newPost = await this.postModel.create(createPostDto);
+  async create(
+    subscription: string,
+    companyId: string,
+    createPostDto: CreatePostDto,
+  ) {
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new BadRequestException('company not found');
+
+    // const postsCount = company.posts.length;
+
+    const newPost = await this.postModel.create({
+      ...createPostDto,
+      company: companyId,
+    });
+    await this.companyModel.findByIdAndUpdate(company._id, {
+      $push: { posts: newPost._id },
+      $inc: { crudCount: 1 },
+    });
     return newPost;
   }
 
@@ -39,5 +55,15 @@ export class PostsService {
     if (!deletedPost)
       throw new BadRequestException('post could not be deleted');
     return deletedPost;
+  }
+
+  async crudLimit(companyId: string, subscription: string) {
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new BadRequestException('company not found');
+
+    if (subscription === 'free_tier' && company.crudCount >= 10)
+      throw new BadRequestException('upgrade subscription plan');
+
+    return true;
   }
 }

@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { Role } from './role.decorator';
+import { IsAuthGuard } from 'src/guards/auth.guard';
+import { IsRoleGuard } from 'src/guards/role.guard';
 
 @Controller('company')
 export class CompanyController {
@@ -23,8 +36,19 @@ export class CompanyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companyService.update(id, updateCompanyDto);
+  @UseGuards(IsAuthGuard, IsRoleGuard)
+  update(
+    @Role() role,
+    @Req() req,
+    @Param('id') id: string,
+    @Body() updateCompanyDto: UpdateCompanyDto,
+  ) {
+    return this.companyService.update(
+      role,
+      req.companyId,
+      id,
+      updateCompanyDto,
+    );
   }
 
   @Delete(':id')

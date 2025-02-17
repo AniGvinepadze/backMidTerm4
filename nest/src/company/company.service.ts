@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -26,8 +27,7 @@ export class CompanyService {
   }
 
   findAll() {
-    return this.companyModel.find();
-    // .populate({ path: 'posts' });
+    return this.companyModel.find().populate({ path: 'posts' });
   }
 
   async findOne(id: string) {
@@ -39,10 +39,11 @@ export class CompanyService {
     return company;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto) {
+  async update(role: string, tokenId:string,id: string, updateCompanyDto: UpdateCompanyDto) {
+    console.log(role, 'rolee3');
+    if ((tokenId !== id) && role !== "admin") throw new UnauthorizedException('permition denied');
     if (!isValidObjectId(id))
       throw new BadRequestException('ivalid id provided');
-
     const updatedCompany = await this.companyModel.findByIdAndUpdate(
       id,
       updateCompanyDto,
