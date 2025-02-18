@@ -4,7 +4,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 import { Company } from 'src/company/company.decorator';
-
+import { emit } from 'process';
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +14,16 @@ export class AuthController {
   signUp(@Body() signUpDto: SignUpDto) {
     return this.authService.signUp(signUpDto);
   }
+  @Post('verify')
+  verifyEmail(@Body('email') body) {
+    const { email, otpCode } = body;
+    return this.authService.verifyEmail(email, otpCode);
+  }
 
+  @Post('resend-verification')
+  resendVerification(@Body ('email') email){
+    return this.authService.resendVerification(email)
+  }
   @Post('sign-in')
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.singIn(signInDto);

@@ -8,14 +8,16 @@ import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class CrudLimitGuard implements CanActivate {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    // private readonly postsService: PostsService
+    private readonly postsService: PostsService
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const companyId = request.companyId;
     const subscription = request.subscription;
 
-    console.log(companyId, 'companyId');
     if (!companyId) {
       throw new BadRequestException('companyId is required');
     }
@@ -27,7 +29,7 @@ export class CrudLimitGuard implements CanActivate {
 
     if (!crudIsAllowed) {
       throw new BadRequestException(
-        'Free-tier limit reached, upgrade subscription',
+        'Subscription limit reached, upgrade subscription',
       );
     }
 

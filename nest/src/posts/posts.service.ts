@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -64,6 +64,27 @@ export class PostsService {
     if (subscription === 'free_tier' && company.crudCount >= 10)
       throw new BadRequestException('upgrade subscription plan');
 
+    if (subscription === 'basic') {
+      if (company.crudCount >= 100) {
+        throw new BadRequestException('upgrade subscription plan');
+      }
+      if (company.employesCount > 10) {
+        const extraEmployees = company.employesCount - 10 + 1;
+        const extraCharge = extraEmployees * 5;
+        console.log(`extra charge:$${extraCharge} per month`);
+        throw new HttpException(
+          {
+            message: `Warning: Extra charge of $${extraCharge} per month .`,
+            extraCharge: extraCharge,
+            status: 'warning',
+          },
+          HttpStatus.OK,
+        );
+      }
+    }
+
     return true;
   }
+
+
 }

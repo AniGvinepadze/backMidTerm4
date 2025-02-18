@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -6,17 +16,19 @@ import { IsAuthGuard } from 'src/guards/auth.guard';
 import { Subscription } from 'src/company/subscription.decorator';
 import { CrudLimitGuard } from 'src/guards/limit.guard';
 
-
 @Controller('posts')
 @UseGuards(IsAuthGuard,CrudLimitGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  
-  create(@Subscription() subscription,@Req() req,@Body() createPostDto: CreatePostDto) {
-    const companyId = req.companyId
-    return this.postsService.create(subscription,companyId,createPostDto);
+  create(
+    @Subscription() subscription,
+    @Req() req,
+    @Body() createPostDto: CreatePostDto,
+  ) {
+    const companyId = req.companyId;
+    return this.postsService.create(subscription, companyId, createPostDto);
   }
 
   @Get()
@@ -38,5 +50,6 @@ export class PostsController {
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);
   }
+
 
 }

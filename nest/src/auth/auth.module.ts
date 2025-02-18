@@ -5,11 +5,13 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { companySchema } from 'src/company/schema/company.schema';
 import { JwtModule } from '@nestjs/jwt';
+import { EmailSenderModule } from 'src/email-sender/email-sender.module';
 
 @Module({
   imports:[
     ConfigModule.forRoot(),
     MongooseModule.forFeature([{name:"company",schema:companySchema}]),
+    EmailSenderModule,
     JwtModule.register({
       global:true,
       secret:process.env.JWT_SECRET
