@@ -8,6 +8,11 @@ import {
   Delete,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipeBuilder,
+  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -15,6 +20,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Role } from './role.decorator';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 import { IsRoleGuard } from 'src/guards/role.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('company')
 export class CompanyController {
@@ -54,5 +60,45 @@ export class CompanyController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.companyService.remove(id);
+  }
+
+  @Post('upload-file')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile()
+    // new ParseFilePipeBuilder()
+    // .addFileTypeValidator({
+    //   fileType:
+    //   "csv",
+
+    // })
+    // .addMaxSizeValidator({
+    //   maxSize: 1000
+    // })
+    // .build({
+    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+    // }),
+    file: Express.Multer.File,
+  ) {
+    const path = Math.random().toString().slice(2);
+    const type = file.mimetype.split('/')[1];
+    const filePath = `files/${path}.${type}`;
+    console.log(filePath, 'path');
+    console.log(file, 'file');
+
+    const allowedMimeTypes = [
+      'text/csv',
+      'application/vnd.ms-excel',
+     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Invalid file type. Only PNG and JPEG are allowed.',
+      );
+    }
+    // console.log(file.buffer, 'file biffer');
+
+    // return this.companyService.uploadFile(filePath, file);
   }
 }

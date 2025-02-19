@@ -7,7 +7,6 @@ import { SignUpDto } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
 import { SignInDto } from './dto/sign-in.dto';
 import { EmailSenderService } from 'src/email-sender/email-sender.service';
-import { throws } from 'assert';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +43,7 @@ export class AuthService {
 
   async verifyEmail(email, otpCode) {
     const existCompany = await this.companyModel.findOne({ email });
-    console.log(existCompany,"existcompanu")
+    console.log(existCompany, 'existcompanu');
     if (!existCompany) throw new BadRequestException('comapny not found');
 
     if (existCompany.isVerified)
@@ -106,7 +105,7 @@ export class AuthService {
     if (!isPassequal)
       throw new BadRequestException('email or password is incorrect');
 
-    if(!existCompany.isVerified) throw new BadRequestException('verify user')
+    if (!existCompany.isVerified) throw new BadRequestException('verify user');
 
     const payLoad = {
       companyId: existCompany._id,
