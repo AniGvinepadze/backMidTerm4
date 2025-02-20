@@ -43,6 +43,7 @@ export class AuthService {
 
   async verifyEmail(email, otpCode) {
     const existCompany = await this.companyModel.findOne({ email });
+    console.log(email, 'email');
     console.log(existCompany, 'existcompanu');
     if (!existCompany) throw new BadRequestException('comapny not found');
 
