@@ -61,34 +61,60 @@ export class EmployeesService {
     return deletedEmplyee;
   }
 
-  async crudLimit(companyId: string, subscription: string) {
+  async crudLimit(
+    companyId: string,
+    subscription: string,
+    uploadedFile: number,
+  ) {
     const company = await this.companyModel.findById(companyId);
-    if (!company) throw new BadRequestException('company not found');
+    if (!company) throw new BadRequestException('Company not found');
+  
 
-    if (subscription === 'free_tier' && company.crudCount >= 10)
-      throw new BadRequestException('upgrade subscription plan');
+    if (subscription === 'free_tier' && company.crudCount >= 10) {
+      throw new BadRequestException('Upgrade subscription plan');
+    }
+  
 
     if (subscription === 'basic') {
-      // if (company.crudCount >= 100) {
-      //   throw new BadRequestException('upgrade subscription plan');
-      // }
       if (company.employesCount > 10) {
-        const extraEmployees = company.employesCount - 10 + 1;
+        const extraEmployees = company.employesCount - 10;
         const extraCharge = extraEmployees * 5;
-        console.log(`extra charge:$${extraCharge} per month`);
         throw new HttpException(
           {
-            message: `Warning: Extra charge of $${extraCharge} per month `,
-            extraCharge: extraCharge,
+            message: `Warning: Extra charge of $${extraCharge} per month`,
+            extraCharge,
             status: 'warning',
           },
           HttpStatus.OK,
         );
       }
+      return { isAllowed: true };
     }
-
-    return true;
+  
+    if (subscription === 'premium') {
+      const basePrice = 300;
+      const fileLimit = 11;
+      const extraFileCost = 0.5;
+  
+      let extraCharge = 0;
+      if (uploadedFile > fileLimit) {
+        extraCharge = (uploadedFile - fileLimit) * extraFileCost;
+      }
+  
+      const totalCost = basePrice + extraCharge;
+  
+      return {
+        isAllowed: true,
+        basePrice,
+        extraCharge,
+        totalCost,
+        message: `Premium Plan: price - $${basePrice}, Extra Files: ${uploadedFile - fileLimit}, Extra Charge: $${extraCharge}, Total: $${totalCost}`,
+      };
+    }
+  
+    throw new BadRequestException('Invalid subscription plan');
   }
+  
 
   async addEmpleyee(companyId: string) {
     const company = await this.companyModel.findById(companyId);
@@ -98,11 +124,7 @@ export class EmployeesService {
       throw new BadRequestException('only basic plan cann add employees');
     }
 
-    // if(company.employesCount >= 10){
-    //   const extraEmployees = company.employesCount - 10 + 1
-    //   const extraCharge = extraEmployees * 5
-    //   console.log(`extra charge:$${extraCharge} per month`)
-    // }
+    
 
     await this.companyModel.findByIdAndUpdate(companyId, {
       $inc: { employesCount: 1 },

@@ -32,11 +32,11 @@ export class AuthService {
       country,
       industry,
       password: hashedPassword,
-      otpCode,
-      otpCodeValidateDate,
+      // otpCode,
+      // otpCodeValidateDate,
     });
 
-    await this.emailSender.sendEmailtext(email, 'Verification Code', otpCode);
+    // await this.emailSender.sendEmailtext(email, 'Verification Code', otpCode);
 
     return 'Verify Email';
   }
@@ -106,7 +106,7 @@ export class AuthService {
     if (!isPassequal)
       throw new BadRequestException('email or password is incorrect');
 
-    if (!existCompany.isVerified) throw new BadRequestException('verify user');
+    // if (!existCompany.isVerified) throw new BadRequestException('verify user');
 
     const payLoad = {
       companyId: existCompany._id,

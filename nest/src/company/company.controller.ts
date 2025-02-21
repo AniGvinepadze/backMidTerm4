@@ -65,20 +65,7 @@ export class CompanyController {
   @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(
-    @UploadedFile()
-    // new ParseFilePipeBuilder()
-    // .addFileTypeValidator({
-    //   fileType:
-    //   "csv",
-
-    // })
-    // .addMaxSizeValidator({
-    //   maxSize: 1000
-    // })
-    // .build({
-    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-    // }),
-    file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     const path = Math.random().toString().slice(2);
     const type = file.mimetype.split('/')[1];
@@ -89,7 +76,7 @@ export class CompanyController {
     const allowedMimeTypes = [
       'text/csv',
       'application/vnd.ms-excel',
-     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
     if (!allowedMimeTypes.includes(file.mimetype)) {
@@ -97,8 +84,7 @@ export class CompanyController {
         'Invalid file type. Only PNG and JPEG are allowed.',
       );
     }
-    // console.log(file.buffer, 'file biffer');
 
-    // return this.companyService.uploadFile(filePath, file);
+    return this.companyService.uploadFile(filePath, file);
   }
 }

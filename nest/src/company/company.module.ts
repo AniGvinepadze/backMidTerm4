@@ -8,7 +8,10 @@ import { AwsS3Module } from 'src/aws-s3/aws-s3.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'company', schema: companySchema }]),
+    MongooseModule.forFeature([
+      { name: 'company', schema: companySchema },
+      
+    ]),
     AwsS3Module
   ],
   controllers: [CompanyController],
