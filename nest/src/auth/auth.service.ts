@@ -18,7 +18,7 @@ export class AuthService {
 
   async signUp({ companyName, country, email, industry, password }: SignUpDto) {
     const existCompany = await this.companyModel.findOne({ email });
-    if (existCompany) throw new BadRequestException('user already exist');
+    if (existCompany) throw new BadRequestException('company already exist');
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -32,11 +32,11 @@ export class AuthService {
       country,
       industry,
       password: hashedPassword,
-      // otpCode,
-      // otpCodeValidateDate,
+      otpCode,
+      otpCodeValidateDate,
     });
 
-    // await this.emailSender.sendEmailtext(email, 'Verification Code', otpCode);
+    await this.emailSender.sendEmailtext(email, 'Verification Code', otpCode);
 
     return 'Verify Email';
   }
@@ -71,7 +71,7 @@ export class AuthService {
     });
 
     return {
-      message: 'user verified succsessfully',
+      message: 'company verified succsessfully',
       accessToken,
     };
   }
@@ -106,7 +106,7 @@ export class AuthService {
     if (!isPassequal)
       throw new BadRequestException('email or password is incorrect');
 
-    // if (!existCompany.isVerified) throw new BadRequestException('verify user');
+    if (!existCompany.isVerified) throw new BadRequestException('verify user');
 
     const payLoad = {
       companyId: existCompany._id,

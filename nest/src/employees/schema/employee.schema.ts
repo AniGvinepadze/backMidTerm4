@@ -12,10 +12,21 @@ export class Employee {
   @Prop({ type: String })
   email: string;
 
+  @Prop({ type: String })
+  password: string;
+
+  @Prop({ type: Boolean, default: false })
+  isVerified: boolean;
+
+  @Prop({ type: String })
+  otpCode: string;
+
+  @Prop({ type: Date })
+  otpCodeValidateDate: Date;
+
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'company',
-  
   })
   company: mongoose.Schema.Types.ObjectId[];
 }

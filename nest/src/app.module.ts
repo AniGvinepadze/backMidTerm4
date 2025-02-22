@@ -10,6 +10,7 @@ import { EmployeesModule } from './employees/employees.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailSenderModule } from './email-sender/email-sender.module';
 import { AwsS3Module } from './aws-s3/aws-s3.module';
+import { EmployeesAuthModule } from './employees-auth/employees-auth.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AwsS3Module } from './aws-s3/aws-s3.module';
     EmployeesModule,
     EmailSenderModule,
     AwsS3Module,
+    EmployeesAuthModule,
     
   ],
   controllers: [AppController],

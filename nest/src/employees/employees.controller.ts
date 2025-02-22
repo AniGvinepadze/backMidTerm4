@@ -17,23 +17,9 @@ import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { Subscription } from 'src/company/subscription.decorator';
 
 @Controller('employees')
-@UseGuards(IsAuthGuard,CrudLimitGuard)
+@UseGuards(IsAuthGuard, CrudLimitGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
-
-  @Post()
-  create(
-    @Subscription() subscription,
-    @Req() req,
-    @Body() createEmployeeDto: CreateEmployeeDto,
-  ) {
-    const companyId = req.companyId;
-    return this.employeesService.create(
-      subscription,
-      companyId,
-      createEmployeeDto,
-    );
-  }
 
   @Get()
   findAll() {
@@ -58,9 +44,4 @@ export class EmployeesController {
     return this.employeesService.remove(id);
   }
 
-  @Post('add-employee')
-  addEmployee(@Req() req) {
-    const companyId = req.companyId;
-    return this.employeesService.addEmpleyee(companyId);
-  }
 }
