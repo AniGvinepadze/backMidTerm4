@@ -23,6 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { isVerified } from 'src/guards/isVerified.guard';
 import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
+import { Employee } from 'src/employees/employee.decorator';
 
 @Controller('company')
 @UseGuards(IsAuthGuard, CrudLimitGuard)
@@ -73,48 +74,55 @@ export class CompanyController {
     return this.companyService.addEmpleyee(companyId, employeeSignUpDto);
   }
 
-  @Post('upload-file')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file, 'fileeeeeeee');
-    const path = Math.random().toString().slice(2);
-    // const type = file.mimetype.split('/')[1];
-    const filePath = `files/${path}`;
-    console.log(filePath, 'path');
-    console.log(file, 'file');
-
-    const allowedMimeTypes = [
-      'text/csv',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ];
-
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Invalid file type. Only PNG and JPEG are allowed.',
-      );
-    }
-
-    return this.companyService.uploadFile(filePath, file);
+  @Delete('delete-employee/:id')
+  @UseGuards(isVerified)
+  deleteEmployee(@Param('id') id: string, @Employee() employeeId) {
+    return this.companyService.deleteEmployee(id, employeeId);
   }
 
-  @Post('upload-files')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFiles(@UploadedFiles() files: Express.Multer.File) {
-    const path = Math.random().toString().slice(2);
+  // @Post('upload-file')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadFile(@UploadedFile() file: Express.Multer.File) {
+  //   console.log(file, 'fileeeeeeee');
+  //   const path = Math.random().toString().slice(2);
+  //   const type = file.mimetype.split('/')[1];
+  //   const filePath = `files/${path}.${type}`;
+  //   console.log(filePath, 'path');
+  //   console.log(file, 'file');
 
-    const filePath = `files/${path}`;
+  //   const allowedMimeTypes = [
+  //     'text/csv',
+  //     'application/vnd.ms-excel',
+  //     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //   ];
 
-    return this.companyService.uploadFiles(files);
-  }
+  //   if (!allowedMimeTypes.includes(file.mimetype)) {
+  //     throw new BadRequestException(
+  //       'Invalid file type. Only PNG and JPEG are allowed.',
+  //     );
+  //   }
+  //   console.log(filePath, 'filepath');
 
-  @Post('get-file')
-  getFileById(@Body('fileId') fileId) {
-    return this.companyService.getFile(fileId);
-  }
+  //   return this.companyService.uploadFile(filePath, file);
+  // }
 
-  @Post('delete-file')
-  deleteFileById(@Body('fileId') fileId) {
-    return this.companyService.deleteFileById(fileId);
-  }
+  // @Post('upload-files')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadFiles(@UploadedFiles() files: Express.Multer.File) {
+  //   const path = Math.random().toString().slice(2);
+
+  //   const filePath = `files/${path}`;
+
+  //   return this.companyService.uploadFiles(files);
+  // }
+
+  // @Post('get-file')
+  // getFileById(@Body('fileId') fileId) {
+  //   return this.companyService.getFile(fileId);
+  // }
+
+  // @Post('delete-file')
+  // deleteFileById(@Body('fileId') fileId) {
+  //   return this.companyService.deleteFileById(fileId);
+  // }
 }

@@ -6,18 +6,20 @@ import { companySchema } from 'src/company/schema/company.schema';
 import { employeeSchema } from './schema/employee.schema';
 import { PostsModule } from 'src/posts/posts.module';
 import { CompanyModule } from 'src/company/company.module';
+import { fileSchema } from 'src/files/schema/file.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'employee', schema: employeeSchema },
       { name: 'company', schema: companySchema },
+      { name: 'file', schema: fileSchema },
     ]),
     forwardRef(() => PostsModule),
     CompanyModule,
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService],
-  exports: [EmployeesModule],
+  exports: [EmployeesModule, EmployeesService],
 })
 export class EmployeesModule {}

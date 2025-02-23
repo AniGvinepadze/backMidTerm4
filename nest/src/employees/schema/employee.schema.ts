@@ -25,10 +25,16 @@ export class Employee {
   otpCodeValidateDate: Date;
 
   @Prop({
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'company',
   })
-  company: mongoose.Schema.Types.ObjectId[];
+  company: mongoose.Schema.Types.ObjectId;
+
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'file',
+  })
+  file: mongoose.Schema.Types.ObjectId[];
 }
 
 export const employeeSchema = SchemaFactory.createForClass(Employee);

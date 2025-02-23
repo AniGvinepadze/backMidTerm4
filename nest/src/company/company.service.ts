@@ -17,6 +17,7 @@ import { AwsS3Service } from 'src/aws-s3/aws-s3.service';
 import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
 import { Employee } from 'src/employees/schema/employee.schema';
 import * as bcrypt from 'bcrypt';
+import { classToClassFromExist } from 'class-transformer';
 
 @Injectable()
 @UseGuards(IsAuthGuard)
@@ -137,7 +138,9 @@ export class CompanyService {
     { firstName, email, lastName, password }: EmployeeSignUpDto,
   ) {
     const company = await this.companyModel.findById(companyId);
+
     if (!company) throw new BadRequestException('company not found');
+
     console.log('Company Subscription Plan:', company.subscriptionPlan);
 
     if (!['basic', 'premium'].includes(company.subscriptionPlan)) {
@@ -165,6 +168,7 @@ export class CompanyService {
       firstName,
       lastName,
       password: hashedPassword,
+      company:companyId,
       otpCode,
       otpCodeValidateDate,
     });
@@ -172,29 +176,39 @@ export class CompanyService {
     return employee;
   }
 
-  uploadFile(filePath, file) {
-    return this.s3Service.uploadFile(filePath, file);
+  async deleteEmployee(id: string, employeeId: string) {
+    if (!isValidObjectId(id))
+      throw new BadRequestException('Invalid ID provided');
+
+    const deletedEmployee = await this.employeeModel.findByIdAndDelete(id);
+    // console.log(deletedEmployee, 'deletedEmplieyyyee');
+
+    return deletedEmployee;
   }
 
-  async uploadFiles(files) {
-    const fileIds = [];
+  // uploadFile(filePath, file) {
+  //   return this.s3Service.uploadFile(filePath, file);
+  // }
 
-    for (let file of files) {
-      const path = Math.random().toString().slice(2);
+  // async uploadFiles(files) {
+  //   const fileIds = [];
 
-      const filePath = `files/${path}`;
+  //   for (let file of files) {
+  //     const path = Math.random().toString().slice(2);
 
-      const fileId = await this.s3Service.uploadFile(filePath, file);
+  //     const filePath = `files/${path}`;
 
-      fileIds.push(fileId);
-    }
-  }
+  //     const fileId = await this.s3Service.uploadFile(filePath, file);
 
-  getFile(fileId) {
-    return this.s3Service.getFileById(fileId);
-  }
+  //     fileIds.push(fileId);
+  //   }
+  // }
 
-  deleteFileById(fileId) {
-    return this.s3Service.deleteFileId(fileId);
-  }
+  // getFile(fileId) {
+  //   return this.s3Service.getFileById(fileId);
+  // }
+
+  // deleteFileById(fileId) {
+  //   return this.s3Service.deleteFileId(fileId);
+  // }
 }

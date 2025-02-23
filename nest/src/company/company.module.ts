@@ -5,12 +5,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { companySchema } from './schema/company.schema';
 import { AwsS3Module } from 'src/aws-s3/aws-s3.module';
 import { employeeSchema } from 'src/employees/schema/employee.schema';
+import { fileSchema } from 'src/files/schema/file.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'company', schema: companySchema },
       { name: 'employee', schema: employeeSchema },
+      { name: 'file', schema: fileSchema },
     ]),
     AwsS3Module,
   ],

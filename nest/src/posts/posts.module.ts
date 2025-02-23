@@ -6,6 +6,7 @@ import { postSchema } from './schema/post.schema';
 import { companySchema } from 'src/company/schema/company.schema';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { CompanyModule } from 'src/company/company.module';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { CompanyModule } from 'src/company/company.module';
       { name: 'company', schema: companySchema },
     ]),
     // EmployeesModule
-    CompanyModule
+    CompanyModule,FilesModule
   ],
   controllers: [PostsController],
   providers: [PostsService],

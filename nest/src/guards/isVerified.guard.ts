@@ -19,7 +19,7 @@ export class isVerified implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // try {
+    try {
     const request = context.switchToHttp().getRequest();
     const token = this.getTokenFromHeader(request.headers);
 
@@ -37,9 +37,9 @@ export class isVerified implements CanActivate {
       throw new UnauthorizedException('company is not verified');
 
     return true;
-    // } catch (error) {
-    //   throw new UnauthorizedException('permition denied for isVerifed');
-    // }
+    } catch (error) {
+      throw new UnauthorizedException('permition denied for isVerifed');
+    }
   }
   getTokenFromHeader(headers) {
     const authorization = headers['authorization'];

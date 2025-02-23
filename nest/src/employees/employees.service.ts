@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -47,9 +48,32 @@ export class EmployeesService {
   findOne(id: string) {
     return `This action returns a #${id} employee`;
   }
+  async update(
+    employeId: string,
+    id: string,
+    updateEmployeeDto: UpdateEmployeeDto,
+  ) {
+    if (!isValidObjectId(id))
+      throw new BadRequestException('Invalid ID provided');
 
-  update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
-    return `This action updates a #${id} employee`;
+    const { email } = updateEmployeeDto;
+
+    const existEmployee = await this.employeeModel.findOne({ email });
+    console.log(existEmployee, 'existEmployee');
+
+    if (existEmployee && existEmployee.isVerified) {
+      throw new BadRequestException('company already verified');
+    }
+
+    const updatedEmployee = await this.employeeModel.findByIdAndUpdate(
+      id,
+      updateEmployeeDto,
+      { new: true },
+    );
+
+    if (!updatedEmployee) throw new NotFoundException('employee not found ');
+
+    return updatedEmployee;
   }
 
   async remove(id: string) {
@@ -60,6 +84,4 @@ export class EmployeesService {
       throw new BadRequestException('Employee could not be deleted');
     return deletedEmplyee;
   }
-
-
 }

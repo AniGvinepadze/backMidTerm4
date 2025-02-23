@@ -112,6 +112,7 @@ export class AuthService {
       companyId: existCompany._id,
       role: existCompany.role,
       subscription: existCompany.subscriptionPlan,
+      file:existCompany.file
     };
 
     const accessToken = await this.jwtService.sign(payLoad, {

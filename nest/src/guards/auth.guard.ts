@@ -21,6 +21,7 @@ import {
         const payLoad = await this.jwtService.verify(token);
         request.companyId = payLoad.companyId;
         request.subscription = payLoad.subscription
+        // request.uploadedFile = payLoad.uploadedFile
   
         return true;
       } catch (error) {

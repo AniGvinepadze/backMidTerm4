@@ -4,35 +4,37 @@ import {
   ExecutionContext,
   Injectable,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CompanyService } from 'src/company/company.service';
-import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class CrudLimitGuard implements CanActivate {
   constructor(
-    // private readonly postsService: PostsService
-    // private readonly postsService: PostsService
+
+    private jwtService: JwtService,
     private readonly companyService: CompanyService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-   console.log(request)
-    const companyId = request.companyId;
-    const subscription = request.subscription;
-    const uploadedFile = request.file;
+    const token = this.getTokenFromHeader(request.headers);
+    console.log(token)
 
-    console.log(request.companyId, 'companyId');
-    console.log(request.subscription, 'subs');
+    if (!token) throw new BadRequestException('token is provided');
+    const payLoad = await this.jwtService.verify(token);
+    request.companyId = payLoad.companyId;
+    request.subscription = payLoad.subscription;
+    // request.uploadedFile = payLoad.file;
+    // console.log(request.uploadedFile, 'uploaded file');
 
-    if (!companyId) {
+    if (!request.companyId) {
       throw new BadRequestException('companyId is required');
     }
 
     const crudIsAllowed = await this.companyService.crudLimit(
-      companyId,
-      subscription,
-      uploadedFile,
+      request.companyId,
+      request.subscription,
+      request.uploadedFile,
     );
 
     if (!crudIsAllowed) {
@@ -42,5 +44,11 @@ export class CrudLimitGuard implements CanActivate {
     }
 
     return true;
+  }
+  getTokenFromHeader(headers) {
+    const authorization = headers['authorization'];
+    if (!authorization) return null;
+    const [type, token] = authorization.split(' ');
+    return type === 'Bearer' ? token : null;
   }
 }

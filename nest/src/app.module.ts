@@ -11,6 +11,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailSenderModule } from './email-sender/email-sender.module';
 import { AwsS3Module } from './aws-s3/aws-s3.module';
 import { EmployeesAuthModule } from './employees-auth/employees-auth.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { EmployeesAuthModule } from './employees-auth/employees-auth.module';
     EmailSenderModule,
     AwsS3Module,
     EmployeesAuthModule,
+    FilesModule,
     
   ],
   controllers: [AppController],
