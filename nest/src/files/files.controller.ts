@@ -19,9 +19,10 @@ import { IsAuthGuard } from 'src/guards/auth.guard';
 import { fileGuard } from 'src/guards/file.guard';
 import { isVerifiedEmployee } from 'src/guards/isVerifiedEmployee.guard';
 import { Employee } from 'src/employees/employee.decorator';
+import { Company } from 'src/company/company.decorator';
 
 @Controller('files')
-@UseGuards(isVerifiedEmployee,fileGuard)
+@UseGuards(IsAuthGuard, fileGuard)
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
@@ -31,29 +32,25 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File,
     @Employee() employeeId,
     @Body() body,
+    @Company() companyId
   ) {
+    const allowedMimeTypes = [
+      'text/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
 
-    console.log('File uploaded:', file);
-    console.log('Employee ID:', employeeId);
-    console.log('Request body:', body);
-    // const path = Math.random().toString().slice(2);
-    // const type = file.mimetype.split('/')[1];
-    // const filePath = `files/${path}.${type}`;
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Invalid file type. Only CSV and Excel are allowed.',
+      );
+    }
+    const path = Math.random().toString().slice(2);
+    const filePath = `files/${path}`;
 
-    // const allowedMimeTypes = [
-    //   'text/csv',
-    //   'application/vnd.ms-excel',
-    //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    // ];
-
-    // if (!allowedMimeTypes.includes(file.mimetype)) {
-    //   throw new BadRequestException(
-    //     'Invalid file type. Only CSV and Excel are allowed.',
-    //   );
-    // }
     // console.log(filePath, 'filepath');
 
-    return this.filesService.uploadFile( file, employeeId, body);
+    return this.filesService.uploadFile(file, employeeId, body, filePath, companyId);
   }
 
   @Post('upload-files')

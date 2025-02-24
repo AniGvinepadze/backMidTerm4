@@ -22,45 +22,29 @@ export class FilesService {
     @InjectModel('company') private companyModel: Model<Company>,
   ) {}
 
-  async uploadFile(file, employeeId, body) {
-    const employee = await this.employeeModel.findById(employeeId);
-    console.log(employeeId,"employheeId")
-    if (!employee) {
-      throw new BadRequestException('employee not found.');
-    }
-
-    const company = await this.companyModel.findById(employee.company);
-    if (!company) {
-      throw new BadRequestException('company not found.');
-    }
-    console.log(company, 'companuy');
-    console.log(employee, 'employee');
-
-    // if (company.subscriptionPlan === 'free_tier' && company.crudCount >= 10) {
-    //   throw new BadRequestException('Upgrade subscription plan');
-    // }
-
-    // if (company.subscriptionPlan === 'basic' && company.employesCount > 10) {
-    //   const extraCharge = (company.employesCount - 10) * 5;
-    //   throw new HttpException(
-    //     {
-    //       message: `warning: Extra charge of $${extraCharge} per month`,
-    //       extraCharge,
-    //       status: 'warning',
-    //     },
-    //     HttpStatus.OK,
-    //   );
-    // }
-
-    const path = Math.random().toString().slice(2);
-    const type = file.mimetype.split('/')[1];
-    const filePath = `files/${path}.${type}`;
-   
-    const uploadFile = await this.s3Service.uploadFile(filePath, file);
-    console.log('S3 Upload Success:', uploadFile);
-
+  async uploadFile(file, employeeId, body, filePath, companyId) {
+    // const uploadFile = await this.s3Service.uploadFile(filePath, file);
+    // console.log('S3 Upload Success:', uploadFile);
+    console.log(companyId, 'compnayID');
+    const uploadedFile = await this.fileModel.create({
+      filePath,
+      employee: employeeId,
+      company: companyId,
+      view: [],
+    });
+    const gela = await this.employeeModel.findByIdAndUpdate(
+      companyId,
+      {
+        $push: { file: uploadedFile._id },
+      },
+      { new: true },
+    );
+    console.log(gela, 'gela');
+    const company = await this.companyModel.findById(companyId);
+    // company.file.push(uploadedFile._id)
+    await company.save();
+    console.log(company, 'company');
     return { message: 'File uploaded successfully', filePath };
-    // return this.s3Service.uploadFile(filePath, file);
   }
 
   async uploadFiles(files) {

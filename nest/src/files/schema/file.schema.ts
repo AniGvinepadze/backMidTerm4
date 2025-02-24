@@ -7,16 +7,14 @@ export class File {
   filePath: string;
 
   @Prop({
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'employee',
-    default: [],
   })
-  employee: mongoose.Schema.Types.ObjectId[];
+  employee: mongoose.Schema.Types.ObjectId;
 
   @Prop({
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'company',
-    default: [],
   })
   company: mongoose.Schema.Types.ObjectId[];
 

@@ -25,13 +25,16 @@ export class isVerifiedEmployee implements CanActivate {
       if (!token) throw new BadRequestException('token is provided');
 
       const payLoad = await this.jwtService.verify(token);
-      console.log(payLoad,"payLoad")
-      console.log(token,"token")
+      console.log(payLoad, 'payLoad in employy auth');
+      console.log(token, 'token in employe auth');
 
       request.employeeId = payLoad.employeeId;
+      console.log(payLoad.employeeId, 'employId in employ auth');
       request.comapnyId = payLoad.companyId;
+      console.log(payLoad.companyId, 'companyId in employ auth');
       request.file = payLoad.file;
       request.isVerified = payLoad.isVeri;
+      console.log(payLoad.isVerified, 'isVerifird in employ auth');
       // console.log(request.comapnyId, 'companuId ');
 
       console.log(request.employeeId, 'employeID');

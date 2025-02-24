@@ -4,70 +4,41 @@ import {
   ExecutionContext,
   Injectable,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { CompanyService } from 'src/company/company.service';
-import { EmployeesService } from 'src/employees/employees.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Company } from 'src/company/schema/company.schema';
+import { Employee } from 'src/employees/schema/employee.schema';
+import { Subscription } from 'src/enums/subscription.enum';
 
 @Injectable()
 export class fileGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private readonly companyService: CompanyService,
-    private readonly employeeService: EmployeesService,
+    @InjectModel('employee') private employModel: Model<Employee>,
+    @InjectModel('company') private companyModel: Model<Company>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = this.getTokenFromHeader(request.headers);
-    // console.log(request, 'req');
-    // console.log(token, 'tpkenm');
+    const employId = request.employeeId;
 
-    if (!token) throw new BadRequestException('Token is required');
-    const payLoad = await this.jwtService.verify(token);
- 
-    request.companyId = payLoad.companyId;
-    request.employeeId = payLoad.employeeId;
-    console.log(request.employeeId,"dsd")
-    request.subscription = payLoad.subscription;
-    // console.log(request, 'request');
+    const employ = await this.employModel.findById(employId);
+    const company = await this.companyModel.findById(employ.company);
+    request.companyId = employ.company;
 
-    request.file = payLoad.file;
-
-    if (!request.file) {
-      throw new BadRequestException('No file provided.');
+    if (
+      company.file.length > 10 &&
+      company.subscriptionPlan === Subscription.FREE_TIER
+    ) {
+      throw new BadRequestException('permition dineded');
     }
 
-    const allowedMimeTypes = [
-      'text/csv',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ];
-
-    if (!allowedMimeTypes.includes(request.file.mimetype)) {
-      throw new BadRequestException(
-        'Invalid file type. Only CSV and Excel files are allowed.',
-      );
-    }
-
-    const crudIsAllowed = await this.companyService.crudLimit(
-      request.companyId,
-      request.subscription,
-      request.file,
-    );
-
-    if (!crudIsAllowed) {
-      throw new BadRequestException(
-        'Subscription limit reached, upgrade subscription',
-      );
+    if (
+      company.file.length > 100 &&
+      company.subscriptionPlan === Subscription.BASIC
+    ) {
+      throw new BadRequestException('permition dineded');
     }
 
     return true;
-  }
-
-  getTokenFromHeader(headers) {
-    const authorization = headers['authorization'];
-    if (!authorization) return null;
-    const [type, token] = authorization.split(' ');
-    return type === 'Bearer' ? token : null;
   }
 }
