@@ -19,6 +19,6 @@ import { fileSchema } from 'src/files/schema/file.schema';
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService],
-  exports: [EmployeesModule, EmployeesService],
+  exports: [EmployeesModule, EmployeesService,MongooseModule],
 })
 export class EmployeesModule {}

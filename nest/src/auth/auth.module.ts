@@ -13,14 +13,15 @@ import { EmployeesModule } from 'src/employees/employees.module';
     ConfigModule.forRoot(),
     MongooseModule.forFeature([{name:"company",schema:companySchema}]),
     EmailSenderModule,
+    EmployeesModule,
     JwtModule.register({
       global:true,
       secret:process.env.JWT_SECRET
     }),
-    EmployeesModule
 
   ],
   controllers: [AuthController],
   providers: [AuthService],
+  
 })
 export class AuthModule {}

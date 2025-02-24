@@ -14,7 +14,7 @@ import { Employee } from 'src/employees/schema/employee.schema';
 export class IsAuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    @InjectModel("employee") private employeeModel:Model<Employee>
+    @InjectModel('employee') private employeeModel: Model<Employee>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,8 +28,8 @@ export class IsAuthGuard implements CanActivate {
       request.companyId = payLoad.companyId;
       request.employeeId = payLoad.employeeId;
       request.subscription = payLoad.subscription;
-      const employee = await this.employeeModel.find()
-      console.log(employee,"employee")
+      const employee = await this.employeeModel.find();
+      console.log(employee, 'employee');
       console.log(request.companyId, 'companyId in auth');
       console.log(request.employeeId, 'employeeId in auth');
       // request.uploadedFile = payLoad.uploadedFile
