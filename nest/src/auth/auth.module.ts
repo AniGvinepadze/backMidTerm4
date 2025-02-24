@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { companySchema } from 'src/company/schema/company.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailSenderModule } from 'src/email-sender/email-sender.module';
+import { EmployeesModule } from 'src/employees/employees.module';
 
 @Module({
   imports:[
@@ -15,7 +16,9 @@ import { EmailSenderModule } from 'src/email-sender/email-sender.module';
     JwtModule.register({
       global:true,
       secret:process.env.JWT_SECRET
-    })
+    }),
+    EmployeesModule
+
   ],
   controllers: [AuthController],
   providers: [AuthService],

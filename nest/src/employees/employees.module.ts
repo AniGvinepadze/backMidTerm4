@@ -4,7 +4,7 @@ import { EmployeesController } from './employees.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { companySchema } from 'src/company/schema/company.schema';
 import { employeeSchema } from './schema/employee.schema';
-import { PostsModule } from 'src/posts/posts.module';
+
 import { CompanyModule } from 'src/company/company.module';
 import { fileSchema } from 'src/files/schema/file.schema';
 
@@ -15,8 +15,7 @@ import { fileSchema } from 'src/files/schema/file.schema';
       { name: 'company', schema: companySchema },
       { name: 'file', schema: fileSchema },
     ]),
-    forwardRef(() => PostsModule),
-    CompanyModule,
+    forwardRef(() => CompanyModule)
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService],

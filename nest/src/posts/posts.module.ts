@@ -14,8 +14,9 @@ import { FilesModule } from 'src/files/files.module';
       { name: 'post', schema: postSchema },
       { name: 'company', schema: companySchema },
     ]),
-    // EmployeesModule
-    CompanyModule,FilesModule
+    EmployeesModule,
+    CompanyModule,
+    FilesModule
   ],
   controllers: [PostsController],
   providers: [PostsService],

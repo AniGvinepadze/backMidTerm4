@@ -20,13 +20,14 @@ import { Role } from './role.decorator';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 import { IsRoleGuard } from 'src/guards/role.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CrudLimitGuard } from 'src/guards/limit.guard';
+// import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { isVerified } from 'src/guards/isVerified.guard';
 import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
 import { Employee } from 'src/employees/employee.decorator';
+import { fileGuard } from 'src/guards/file.guard';
 
 @Controller('company')
-@UseGuards(IsAuthGuard, CrudLimitGuard)
+@UseGuards(IsAuthGuard)
 @UseInterceptors(FileInterceptor('file'))
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}

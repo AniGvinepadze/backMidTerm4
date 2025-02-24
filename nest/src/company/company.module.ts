@@ -6,6 +6,7 @@ import { companySchema } from './schema/company.schema';
 import { AwsS3Module } from 'src/aws-s3/aws-s3.module';
 import { employeeSchema } from 'src/employees/schema/employee.schema';
 import { fileSchema } from 'src/files/schema/file.schema';
+import { EmployeesModule } from 'src/employees/employees.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { fileSchema } from 'src/files/schema/file.schema';
       { name: 'file', schema: fileSchema },
     ]),
     AwsS3Module,
+    EmployeesModule,
   ],
   controllers: [CompanyController],
   providers: [CompanyService],

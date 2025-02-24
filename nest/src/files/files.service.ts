@@ -24,6 +24,7 @@ export class FilesService {
 
   async uploadFile(file, employeeId, body) {
     const employee = await this.employeeModel.findById(employeeId);
+    console.log(employeeId,"employheeId")
     if (!employee) {
       throw new BadRequestException('employee not found.');
     }

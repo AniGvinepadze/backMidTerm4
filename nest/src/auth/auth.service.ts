@@ -16,7 +16,7 @@ export class AuthService {
     private emailSender: EmailSenderService,
   ) {}
 
-  async signUp({ companyName, country, email, industry, password }: SignUpDto) {
+  async signUp({ companyName, country, email, industry, password }: SignUpDto,employeeId) {
     const existCompany = await this.companyModel.findOne({ email });
     if (existCompany) throw new BadRequestException('company already exist');
 
@@ -31,6 +31,7 @@ export class AuthService {
       companyName,
       country,
       industry,
+      employeeId,
       password: hashedPassword,
       otpCode,
       otpCodeValidateDate,

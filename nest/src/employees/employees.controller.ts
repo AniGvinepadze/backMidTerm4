@@ -11,7 +11,7 @@ import {
 import { EmployeesService } from './employees.service';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
-import { CrudLimitGuard } from 'src/guards/limit.guard';
+// import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { isVerifiedEmployee } from 'src/guards/isVerifiedEmployee.guard';
 import { Employee } from './employee.decorator';
 
@@ -21,13 +21,13 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get()
-  @UseGuards(CrudLimitGuard)
+  // @UseGuards(CrudLimitGuard)
   findAll() {
     return this.employeesService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(CrudLimitGuard)
+  // @UseGuards(CrudLimitGuard)
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
   }
@@ -51,7 +51,7 @@ export class EmployeesController {
   }
 
   @Delete(':id')
-  @UseGuards(CrudLimitGuard)
+  // @UseGuards(CrudLimitGuard)
   remove(@Param('id') id: string) {
     return this.employeesService.remove(id);
   }

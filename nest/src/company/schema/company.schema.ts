@@ -34,6 +34,10 @@ export class Company {
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'post', default: [] })
   posts: mongoose.Schema.Types.ObjectId[];
+
+  
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'employee', default: [] })
+  employee: mongoose.Schema.Types.ObjectId[];
   
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'file', default: [] })
   file: mongoose.Schema.Types.ObjectId[];

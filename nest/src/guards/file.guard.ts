@@ -19,47 +19,40 @@ export class fileGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.getTokenFromHeader(request.headers);
+    // console.log(request, 'req');
+    // console.log(token, 'tpkenm');
 
     if (!token) throw new BadRequestException('Token is required');
     const payLoad = await this.jwtService.verify(token);
-    console.log(payLoad,"payload")
-
-    // Attach JWT info to the request object
+ 
     request.companyId = payLoad.companyId;
     request.employeeId = payLoad.employeeId;
+    console.log(request.employeeId,"dsd")
     request.subscription = payLoad.subscription;
+    // console.log(request, 'request');
 
-    console.log(request.companyId, 'companyId');
-    console.log(request.employeeId, 'employeeId');
-    console.log(request.subscription, 'subscription');
+    request.file = payLoad.file;
 
-    // Access the file directly from the request
-    const file = request.file; // This is the file that was uploaded using the FileInterceptor
-    console.log(file, 'file');
-
-    // If file is missing, throw an error
-    if (!file) {
+    if (!request.file) {
       throw new BadRequestException('No file provided.');
     }
 
-    // Allowed mime types for file validation
     const allowedMimeTypes = [
       'text/csv',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    if (!allowedMimeTypes.includes(request.file.mimetype)) {
       throw new BadRequestException(
         'Invalid file type. Only CSV and Excel files are allowed.',
       );
     }
 
-    // Check if the CRUD limit is reached for the company
     const crudIsAllowed = await this.companyService.crudLimit(
       request.companyId,
       request.subscription,
-      file,
+      request.file,
     );
 
     if (!crudIsAllowed) {
@@ -71,7 +64,6 @@ export class fileGuard implements CanActivate {
     return true;
   }
 
-  // Utility function to extract token from headers
   getTokenFromHeader(headers) {
     const authorization = headers['authorization'];
     if (!authorization) return null;
