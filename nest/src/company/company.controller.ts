@@ -29,6 +29,8 @@ import { Company } from './company.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { File } from 'src/files/schema/file.schema';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { Subscription } from 'src/enums/subscription.enum';
 
 @Controller('company')
 @UseGuards(IsAuthGuard)
@@ -60,6 +62,22 @@ export class CompanyController {
     return this.companyService.findOne(id);
   }
 
+  @Patch('change-password/:id')
+  async changePassword (@Body () changePasswordDto:ChangePasswordDto,@Company () companyId){
+    return this.companyService.changePassword(changePasswordDto,companyId)
+  }
+
+  @Patch('upgrade-subscrription/:id')
+  async upgradePlan(@Company () companyId){
+    return this.companyService.upgradePlan(companyId)
+  }
+  @Patch('downgrade-subscrription/:id')
+  async downgradePlan(@Param('id') companyId: string, @Body('newPlan') newPlan: Subscription) {
+    console.log(newPlan)
+    return this.companyService.downgradePlan(companyId, newPlan);
+  }
+
+
   @Patch(':id')
   @UseGuards(IsAuthGuard, IsRoleGuard)
   update(
@@ -76,6 +94,7 @@ export class CompanyController {
     );
   }
 
+  
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.companyService.remove(id);

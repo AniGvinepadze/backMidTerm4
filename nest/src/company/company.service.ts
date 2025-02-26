@@ -20,6 +20,8 @@ import { Employee } from 'src/employees/schema/employee.schema';
 import * as bcrypt from 'bcrypt';
 import { classToClassFromExist } from 'class-transformer';
 import { Subscription } from 'src/enums/subscription.enum';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { combineAll } from 'rxjs';
 
 @Injectable()
 @UseGuards(IsAuthGuard)
@@ -237,5 +239,66 @@ export class CompanyService {
         message: `premium plan: price $${basePrice}, extra charge: $${extraCharge},total: $${totalCost}`,
       };
     }
+  }
+
+  async changePassword(
+    { currentPassword, newPassword }: ChangePasswordDto,
+    companyId: string,
+  ) {
+    console.log(currentPassword, 'currentPassword');
+
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new NotFoundException('Company not found');
+
+    const isPassEqual = await bcrypt.compare(currentPassword, company.password);
+    if (!isPassEqual)
+      throw new BadRequestException('Current password is incorrect');
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await this.companyModel.findByIdAndUpdate(companyId, {
+      password: hashedNewPassword,
+    });
+
+    return { message: 'Password updated successfully' };
+  }
+
+  async upgradePlan(companyId: string) {
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new NotFoundException('company not found');
+
+    if (company.subscriptionPlan === Subscription.PREMIUM) {
+      throw new BadRequestException('premium plan cannot be upgraded');
+    }
+
+    let newPlan = company.subscriptionPlan;
+
+    if (company.subscriptionPlan === Subscription.FREE_TIER) {
+      newPlan = Subscription.BASIC;
+    }
+    if (company.subscriptionPlan === Subscription.BASIC) {
+      newPlan = Subscription.PREMIUM;
+    }
+
+    await this.companyModel.findByIdAndUpdate(companyId, {
+      subscriptionPlan: newPlan,
+    });
+
+    return `successfully upgraded to ${newPlan}`
+  }
+
+  async downgradePlan(companyId:string,newPlan:Subscription){
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new NotFoundException('Company not found');
+
+    console.log(newPlan,"newPlan")
+
+    if (company.subscriptionPlan !== Subscription.PREMIUM) {
+      throw new BadRequestException('Only Premium plans can downgrade');
+    }
+
+   
+    await this.companyModel.findByIdAndUpdate(companyId,{subscriptionPlan:newPlan})
+ 
+    return ` succsessfully downgraded to ${newPlan}`
   }
 }

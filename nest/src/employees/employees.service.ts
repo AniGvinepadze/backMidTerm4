@@ -40,13 +40,15 @@ export class EmployeesService {
   }
 
   findAll() {
-    return this.employeeModel
-      .find()
-      .populate({ path: 'company', select: '-posts -createdAt -__v' });
+    throw new BadRequestException(
+      'sorry, only company is able to see employees full list',
+    );
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} employee`;
+    throw new BadRequestException(
+      'sorry, only company is able to see employees full list',
+    );
   }
   async update(
     employeId: string,

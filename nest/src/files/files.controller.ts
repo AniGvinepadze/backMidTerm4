@@ -30,14 +30,16 @@ export class FilesController {
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Employee() employeeId,
-    @Body() body,
-    @Company() companyId
+    @Body() view,
+    @Company() companyId,
   ) {
     const allowedMimeTypes = [
       'text/csv',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
+
+    console.log(view, 'view in controller');
 
     if (!allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
@@ -49,7 +51,13 @@ export class FilesController {
 
     // console.log(filePath, 'filepath');
 
-    return this.filesService.uploadFile(file, employeeId, body, filePath, companyId);
+    return this.filesService.uploadFile(
+      file,
+      employeeId,
+      view,
+      filePath,
+      companyId,
+    );
   }
 
   @Post('upload-files')

@@ -22,7 +22,8 @@ export class FilesService {
     @InjectModel('company') private companyModel: Model<Company>,
   ) {}
 
-  async uploadFile(file, employeeId, body, filePath, companyId) {
+  async uploadFile(file, employeeId, view, filePath, companyId) {
+    console.log("shempvida")
     await this.s3Service.uploadFile(filePath, file);
 
     const uploadedFile = await this.fileModel.create({
@@ -31,6 +32,9 @@ export class FilesService {
       company: companyId,
       view: [],
     });
+
+
+    console.log(view,"view")
     await this.employeeModel.findByIdAndUpdate(
       employeeId,
       { $push: { file: uploadedFile._id } },
@@ -41,7 +45,8 @@ export class FilesService {
       { $push: { file: uploadedFile._id } },
       { new: true },
     );
-    return { message: 'File uploaded successfully', filePath };
+    
+    // return { message: 'File uploaded successfully', filePath };
   }
 
   async uploadFiles(files) {
