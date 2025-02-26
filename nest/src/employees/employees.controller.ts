@@ -10,7 +10,7 @@ import {
 import { EmployeesService } from './employees.service';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
-import { Employee } from './employee.decorator';
+import { Employees } from './employee.decorator';
 import { isVerified } from 'src/guards/isVerified.guard';
 
 @Controller('employees')
@@ -41,7 +41,7 @@ export class EmployeesController {
   update(
     @Param('id') id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
-    @Employee() employeeId,
+    @Employees() employeeId,
   ) {
     return this.employeesService.update(employeeId, id, updateEmployeeDto);
   }

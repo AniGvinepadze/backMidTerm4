@@ -23,7 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 // import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { isVerified } from 'src/guards/isVerified.guard';
 import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
-import { Employee } from 'src/employees/employee.decorator';
+import { Employees} from 'src/employees/employee.decorator';
 import { fileGuard } from 'src/guards/file.guard';
 import { Company } from './company.decorator';
 import { InjectModel } from '@nestjs/mongoose';
@@ -42,7 +42,7 @@ export class CompanyController {
   ) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto,@Employee() employeeId) {
+  create(@Body() createCompanyDto: CreateCompanyDto,@Employees() employeeId) {
     return this.companyService.create(createCompanyDto,employeeId);
   }
 
@@ -51,7 +51,7 @@ export class CompanyController {
     return this.companyService.findAll();
   }
   @Get('billing-info')
- async currentMothBilling(@Company() companyId, @Employee () employeeId){
+ async currentMothBilling(@Company() companyId, @Employees () employeeId){
     const file = await this.fileModel.find()
     console.log(file)
    return this.companyService.currentMonthBilling(companyId,employeeId,file)
@@ -109,7 +109,7 @@ export class CompanyController {
 
   @Delete('delete-employee/:id')
   @UseGuards(isVerified)
-  deleteEmployee(@Param('id') id: string, @Employee() employeeId) {
+  deleteEmployee(@Param('id') id: string, @Employees() employeeId) {
     return this.companyService.deleteEmployee(id, employeeId);
   }
 

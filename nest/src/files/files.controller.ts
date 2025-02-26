@@ -17,19 +17,26 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 // import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { fileGuard } from 'src/guards/file.guard';
-import { Employee } from 'src/employees/employee.decorator';
 import { Company } from 'src/company/company.decorator';
+import { InjectModel } from '@nestjs/mongoose';
+
+import { Model } from 'mongoose';
+import { Employee } from 'src/employees/schema/employee.schema';
+import { Employees } from 'src/employees/employee.decorator';
 
 @Controller('files')
 @UseGuards(IsAuthGuard, fileGuard)
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    @InjectModel('employee') private employeeModel: Model<Employee>,
+  ) {}
 
   @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
+  async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Employee() employeeId,
+    @Employees() employeeId,
     @Body() view,
     @Company() companyId,
   ) {
@@ -39,8 +46,6 @@ export class FilesController {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
-    console.log(view, 'view in controller');
-
     if (!allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
         'Invalid file type. Only CSV and Excel are allowed.',
@@ -49,12 +54,14 @@ export class FilesController {
     const path = Math.random().toString().slice(2);
     const filePath = `files/${path}`;
 
-    // console.log(filePath, 'filepath');
+    const employeeView = await this.employeeModel.find();
+    const viewId = view && view.length > 0 ? view : employeeView.map(employee => employee._id);;
+    console.log(viewId, 'viewId');
 
     return this.filesService.uploadFile(
       file,
       employeeId,
-      view,
+      viewId,
       filePath,
       companyId,
     );

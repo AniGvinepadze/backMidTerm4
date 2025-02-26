@@ -3,7 +3,7 @@ import { EmployeesAuthService } from './employees-auth.service';
 import { EmployeeSignUpDto } from './dto/employee-sign-up.dto';
 import { EmployeeSignInDto } from './dto/employee-sign-in.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
-import { Employee } from 'src/employees/employee.decorator';
+import { Employees } from 'src/employees/employee.decorator';
 
 @Controller('employees-auth')
 export class EmployeesAuthController {
@@ -25,13 +25,13 @@ export class EmployeesAuthController {
     return this.employeesAuthService.resendVerification(email);
   }
   @Post('sign-in')
-  singIn(@Body() employeeSignInDto: EmployeeSignInDto){
+  singIn(@Body() employeeSignInDto: EmployeeSignInDto) {
     return this.employeesAuthService.signIn(employeeSignInDto);
   }
 
   @Get('current-employee')
   @UseGuards(IsAuthGuard)
-  getCurrentEmployee(@Employee() employId) {
+  getCurrentEmployee(@Employees() employId) {
     return this.employeesAuthService.getCurrentEmployee(employId);
   }
 }

@@ -5,14 +5,14 @@ import { SignInDto } from './dto/sign-in.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 import { Company } from 'src/company/company.decorator';
 import { emit } from 'process';
-import { Employee } from 'src/employees/employee.decorator';
+import { Employees } from 'src/employees/employee.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('sign-up')
-  signUp(@Body() signUpDto: SignUpDto,@Employee() employeeId) {
+  signUp(@Body() signUpDto: SignUpDto,@Employees() employeeId) {
     return this.authService.signUp(signUpDto,employeeId);
   }
   @Post('verify')
