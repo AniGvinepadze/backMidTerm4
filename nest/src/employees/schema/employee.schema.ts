@@ -33,6 +33,7 @@ export class Employee {
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'file',
+    default: [],
   })
   file: mongoose.Schema.Types.ObjectId[];
 }

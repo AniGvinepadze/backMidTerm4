@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-
   Body,
   Patch,
   Param,
@@ -11,9 +10,8 @@ import {
 import { EmployeesService } from './employees.service';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
-// import { CrudLimitGuard } from 'src/guards/limit.guard';
-import { isVerifiedEmployee } from 'src/guards/isVerifiedEmployee.guard';
 import { Employee } from './employee.decorator';
+import { isVerified } from 'src/guards/isVerified.guard';
 
 @Controller('employees')
 @UseGuards(IsAuthGuard)
@@ -21,13 +19,11 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get()
-  // @UseGuards(CrudLimitGuard)
   findAll() {
     return this.employeesService.findAll();
   }
 
   @Get(':id')
-  // @UseGuards(CrudLimitGuard)
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
   }
@@ -41,7 +37,7 @@ export class EmployeesController {
   // }
 
   @Patch('update-employee/:id')
-  @UseGuards(isVerifiedEmployee)
+  @UseGuards(isVerified)
   update(
     @Param('id') id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,

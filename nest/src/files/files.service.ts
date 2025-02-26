@@ -23,27 +23,24 @@ export class FilesService {
   ) {}
 
   async uploadFile(file, employeeId, body, filePath, companyId) {
-    // const uploadFile = await this.s3Service.uploadFile(filePath, file);
-    // console.log('S3 Upload Success:', uploadFile);
-    console.log(companyId, 'compnayID');
+    await this.s3Service.uploadFile(filePath, file);
+
     const uploadedFile = await this.fileModel.create({
       filePath,
       employee: employeeId,
       company: companyId,
       view: [],
     });
-    const gela = await this.employeeModel.findByIdAndUpdate(
-      companyId,
-      {
-        $push: { file: uploadedFile._id },
-      },
+    await this.employeeModel.findByIdAndUpdate(
+      employeeId,
+      { $push: { file: uploadedFile._id } },
       { new: true },
     );
-    console.log(gela, 'gela');
-    const company = await this.companyModel.findById(companyId);
-    // company.file.push(uploadedFile._id)
-    await company.save();
-    console.log(company, 'company');
+    await this.companyModel.findByIdAndUpdate(
+      companyId,
+      { $push: { file: uploadedFile._id } },
+      { new: true },
+    );
     return { message: 'File uploaded successfully', filePath };
   }
 
@@ -52,11 +49,8 @@ export class FilesService {
 
     for (let file of files) {
       const path = Math.random().toString().slice(2);
-
       const filePath = `files/${path}`;
-
       const fileId = await this.s3Service.uploadFile(filePath, file);
-
       fileIds.push(fileId);
     }
   }

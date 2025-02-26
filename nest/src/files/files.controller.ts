@@ -17,7 +17,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 // import { CrudLimitGuard } from 'src/guards/limit.guard';
 import { fileGuard } from 'src/guards/file.guard';
-import { isVerifiedEmployee } from 'src/guards/isVerifiedEmployee.guard';
 import { Employee } from 'src/employees/employee.decorator';
 import { Company } from 'src/company/company.decorator';
 

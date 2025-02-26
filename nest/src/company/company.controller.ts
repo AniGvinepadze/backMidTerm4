@@ -25,21 +25,34 @@ import { isVerified } from 'src/guards/isVerified.guard';
 import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
 import { Employee } from 'src/employees/employee.decorator';
 import { fileGuard } from 'src/guards/file.guard';
+import { Company } from './company.decorator';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { File } from 'src/files/schema/file.schema';
 
 @Controller('company')
 @UseGuards(IsAuthGuard)
 @UseInterceptors(FileInterceptor('file'))
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    @InjectModel("file") private fileModel:Model<File>
+  ) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companyService.create(createCompanyDto);
+  create(@Body() createCompanyDto: CreateCompanyDto,@Employee() employeeId) {
+    return this.companyService.create(createCompanyDto,employeeId);
   }
 
   @Get()
   findAll() {
     return this.companyService.findAll();
+  }
+  @Get('billing-info')
+ async currentMothBilling(@Company() companyId, @Employee () employeeId){
+    const file = await this.fileModel.find()
+    console.log(file)
+   return this.companyService.currentMonthBilling(companyId,employeeId,file)
   }
 
   @Get(':id')
@@ -81,49 +94,5 @@ export class CompanyController {
     return this.companyService.deleteEmployee(id, employeeId);
   }
 
-  // @Post('upload-file')
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadFile(@UploadedFile() file: Express.Multer.File) {
-  //   console.log(file, 'fileeeeeeee');
-  //   const path = Math.random().toString().slice(2);
-  //   const type = file.mimetype.split('/')[1];
-  //   const filePath = `files/${path}.${type}`;
-  //   console.log(filePath, 'path');
-  //   console.log(file, 'file');
-
-  //   const allowedMimeTypes = [
-  //     'text/csv',
-  //     'application/vnd.ms-excel',
-  //     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //   ];
-
-  //   if (!allowedMimeTypes.includes(file.mimetype)) {
-  //     throw new BadRequestException(
-  //       'Invalid file type. Only PNG and JPEG are allowed.',
-  //     );
-  //   }
-  //   console.log(filePath, 'filepath');
-
-  //   return this.companyService.uploadFile(filePath, file);
-  // }
-
-  // @Post('upload-files')
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadFiles(@UploadedFiles() files: Express.Multer.File) {
-  //   const path = Math.random().toString().slice(2);
-
-  //   const filePath = `files/${path}`;
-
-  //   return this.companyService.uploadFiles(files);
-  // }
-
-  // @Post('get-file')
-  // getFileById(@Body('fileId') fileId) {
-  //   return this.companyService.getFile(fileId);
-  // }
-
-  // @Post('delete-file')
-  // deleteFileById(@Body('fileId') fileId) {
-  //   return this.companyService.deleteFileById(fileId);
-  // }
+ 
 }

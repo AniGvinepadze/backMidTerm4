@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
 } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -18,6 +19,7 @@ import { EmployeeSignUpDto } from 'src/employees-auth/dto/employee-sign-up.dto';
 import { Employee } from 'src/employees/schema/employee.schema';
 import * as bcrypt from 'bcrypt';
 import { classToClassFromExist } from 'class-transformer';
+import { Subscription } from 'src/enums/subscription.enum';
 
 @Injectable()
 @UseGuards(IsAuthGuard)
@@ -28,12 +30,17 @@ export class CompanyService {
     @InjectModel('employee') private employeeModel: Model<Employee>,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto) {
+  async create(createCompanyDto: CreateCompanyDto, employeeId: string) {
+    const employee = await this.employeeModel.findById(employeeId);
+    if (!employee) throw new BadRequestException('employee not found');
     const existCompany = await this.companyModel.findOne({
       email: createCompanyDto.email,
     });
     if (existCompany) throw new BadRequestException('Company already exists');
-    const company = await this.companyModel.create(createCompanyDto);
+    const company = await this.companyModel.create({
+      ...createCompanyDto,
+      employee: employeeId,
+    });
     return company;
   }
 
@@ -138,12 +145,19 @@ export class CompanyService {
     { firstName, email, lastName, password }: EmployeeSignUpDto,
   ) {
     const company = await this.companyModel.findById(companyId);
-
     if (!company) throw new BadRequestException('company not found');
 
     console.log('Company Subscription Plan:', company.subscriptionPlan);
 
-    if (!['basic', 'premium'].includes(company.subscriptionPlan)) {
+    if (company.subscriptionPlan === Subscription.BASIC) {
+      if (company.employee.length >= 10)
+        throw new BadRequestException('upgrade subscription');
+    }
+
+    if (
+      company.subscriptionPlan !== Subscription.BASIC ||
+      Subscription.PREMIUM
+    ) {
       throw new BadRequestException(
         'Only basic or premium plans can add employees',
       );
@@ -155,24 +169,24 @@ export class CompanyService {
     const otpCodeValidateDate = new Date();
     otpCodeValidateDate.setTime(otpCodeValidateDate.getTime() + 3 * 60 * 1000);
 
-    await this.companyModel.findByIdAndUpdate(
-      companyId,
-      {
-        $inc: { employesCount: 1 },
-      },
-      { new: true },
-    );
-
     const employee = await this.employeeModel.create({
       email,
       firstName,
       lastName,
       password: hashedPassword,
-      company:companyId,
+      company: companyId,
       otpCode,
       otpCodeValidateDate,
     });
 
+    await this.companyModel.findByIdAndUpdate(
+      companyId,
+      {
+        $push: { employee: employee._id },
+        // $inc: { employesCount: 1 },
+      },
+      { new: true },
+    );
     return employee;
   }
 
@@ -186,29 +200,42 @@ export class CompanyService {
     return deletedEmployee;
   }
 
-  // uploadFile(filePath, file) {
-  //   return this.s3Service.uploadFile(filePath, file);
-  // }
+  async currentMonthBilling(companyId: string, employeeId: string, file) {
+    const company = await this.companyModel.findById(companyId);
 
-  // async uploadFiles(files) {
-  //   const fileIds = [];
+    if (company.subscriptionPlan === Subscription.BASIC) {
+      const extraEmployees = company.employee.length - 10 + 1;
+      const cost = 0;
+      const extraCharge = extraEmployees * 5;
+      const totalCost = cost + extraCharge;
 
-  //   for (let file of files) {
-  //     const path = Math.random().toString().slice(2);
+      return {
+        cost,
+        extraCharge,
+        totalCost,
+        message: `basic plan : cost : $${cost}, extra charge :$${extraCharge}, totalCost : $${totalCost} `,
+      };
+    }
 
-  //     const filePath = `files/${path}`;
+    if (company.subscriptionPlan === Subscription.PREMIUM) {
+      const basePrice = 300;
+      const fileLimit = 1000;
+      const extraFileCost = 0.5;
 
-  //     const fileId = await this.s3Service.uploadFile(filePath, file);
+      let extraCharge = 0;
 
-  //     fileIds.push(fileId);
-  //   }
-  // }
+      if (file.length > fileLimit) {
+        extraCharge = (file.length - fileLimit) * extraFileCost;
+      }
 
-  // getFile(fileId) {
-  //   return this.s3Service.getFileById(fileId);
-  // }
+      const totalCost = basePrice + extraCharge;
 
-  // deleteFileById(fileId) {
-  //   return this.s3Service.deleteFileId(fileId);
-  // }
+      return {
+        basePrice,
+        extraCharge,
+        totalCost,
+        message: `premium plan: price $${basePrice}, extra charge: $${extraCharge},total: $${totalCost}`,
+      };
+    }
+  }
 }

@@ -103,14 +103,14 @@ export class EmployeesAuthService {
     // if (existEmployee.isVerified)
     //   throw new BadRequestException('employee already verified');
 
-    if (existEmployee.otpCodeValidateDate < new Date())
-      throw new BadRequestException('Otp Code is Out Date');
+    // if (existEmployee.otpCodeValidateDate < new Date())
+    //   throw new BadRequestException('Otp Code is Out Date');
 
-    console.log(existEmployee.otpCode, 'otp code');
-    console.log(otpCode);
+    // console.log(existEmployee.otpCode, 'otp code');
+    // console.log(otpCode);
 
-    if (otpCode !== existEmployee.otpCode)
-      throw new BadRequestException(' wrong otp code');
+    // if (otpCode !== existEmployee.otpCode)
+    //   throw new BadRequestException(' wrong otp code');
 
     await this.employeeModel.findByIdAndUpdate(existEmployee._id, {
       $set: { isVerified: true, otpCode: null, otpCodeValidateDate: null },
