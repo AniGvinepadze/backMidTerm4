@@ -4,6 +4,7 @@ import { EmployeeSignUpDto } from './dto/employee-sign-up.dto';
 import { EmployeeSignInDto } from './dto/employee-sign-in.dto';
 import { IsAuthGuard } from 'src/guards/auth.guard';
 import { Employees } from 'src/employees/employee.decorator';
+import { EmployeeVerifyDto } from './dto/employee-verify.dto';
 
 @Controller('employees-auth')
 export class EmployeesAuthController {
@@ -15,9 +16,8 @@ export class EmployeesAuthController {
   }
 
   @Post('verify')
-  verifyEmail(@Body() body) {
-    const { email, otpCode } = body;
-    return this.employeesAuthService.verifyEmail(email, otpCode);
+  verifyEmail(@Body() employeeVerifyDto:EmployeeVerifyDto,) {
+    return this.employeesAuthService.verifyEmail(employeeVerifyDto);
   }
 
   @Post('resend-verification')

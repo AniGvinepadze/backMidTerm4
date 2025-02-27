@@ -24,7 +24,7 @@ export class Company {
   role: string;
 
   @Prop({ type: String, enum: Subscription, default: Subscription.FREE_TIER })
-  subscriptionPlan: string;
+  subscriptionPlan: Subscription;
 
   @Prop({ type: Number, default: 0 })
   crudCount: number;

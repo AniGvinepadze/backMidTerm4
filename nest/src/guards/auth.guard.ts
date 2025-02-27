@@ -34,6 +34,7 @@ export class IsAuthGuard implements CanActivate {
       request.subscription = payLoad.subscription;
       request.isVerified = payLoad.isVeri;
 
+      // if(request.companyId !== "companyId") throw new BadRequestException('onlu company can get full limit of employees')
       return true;
     } catch (error) {
       throw new UnauthorizedException('permition denied');

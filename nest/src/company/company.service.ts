@@ -22,6 +22,7 @@ import { classToClassFromExist } from 'class-transformer';
 import { Subscription } from 'src/enums/subscription.enum';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { combineAll } from 'rxjs';
+import { EmailSenderService } from 'src/email-sender/email-sender.service';
 
 @Injectable()
 @UseGuards(IsAuthGuard)
@@ -30,6 +31,7 @@ export class CompanyService {
     @InjectModel('company') private companyModel: Model<Company>,
     private s3Service: AwsS3Service,
     @InjectModel('employee') private employeeModel: Model<Employee>,
+    private emailSender: EmailSenderService,
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto, employeeId: string) {
@@ -142,10 +144,7 @@ export class CompanyService {
     throw new BadRequestException('Invalid subscription plan');
   }
 
-  async addEmpleyee(
-    companyId: string,
-    { firstName, email, lastName, password }: EmployeeSignUpDto,
-  ) {
+  async addEmpleyee(companyId: string, { email }: EmployeeSignUpDto) {
     const company = await this.companyModel.findById(companyId);
     if (!company) throw new BadRequestException('company not found');
 
@@ -156,16 +155,16 @@ export class CompanyService {
         throw new BadRequestException('upgrade subscription');
     }
 
-    if (
-      company.subscriptionPlan !== Subscription.BASIC ||
-      Subscription.PREMIUM
-    ) {
-      throw new BadRequestException(
-        'Only basic or premium plans can add employees',
-      );
-    }
+    // if (
+    //   company.subscriptionPlan !== Subscription.BASIC ||
+    //   Subscription.PREMIUM
+    // ) {
+    //   throw new BadRequestException(
+    //     'Only basic or premium plans can add employees',
+    //   );
+    // }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
     const otpCode = Math.random().toString().slice(2, 8);
     const otpCodeValidateDate = new Date();
@@ -173,14 +172,15 @@ export class CompanyService {
 
     const employee = await this.employeeModel.create({
       email,
-      firstName,
-      lastName,
-      password: hashedPassword,
+      // firstName,
+      // lastName,
+      // password: hashedPassword,
       company: companyId,
       otpCode,
       otpCodeValidateDate,
     });
 
+    await this.emailSender.sendEmailtext(email, 'Verification Code', otpCode);
     await this.companyModel.findByIdAndUpdate(
       companyId,
       {
@@ -199,7 +199,7 @@ export class CompanyService {
     const deletedEmployee = await this.employeeModel.findByIdAndDelete(id);
     // console.log(deletedEmployee, 'deletedEmplieyyyee');
 
-    return deletedEmployee;
+    return 'employee deleted succcsessfully';
   }
 
   async currentMonthBilling(companyId: string, employeeId: string, file) {
@@ -266,12 +266,11 @@ export class CompanyService {
     const company = await this.companyModel.findById(companyId);
     if (!company) throw new NotFoundException('company not found');
 
-    if (company.subscriptionPlan === Subscription.PREMIUM) {
-      throw new BadRequestException('premium plan cannot be upgraded');
-    }
-
     let newPlan = company.subscriptionPlan;
 
+    // if(newPlan !== "basic" || "free_tier" || "premium"){
+    //   throw new BadRequestException("your provided subscription doesnt exist")
+    // }
     if (company.subscriptionPlan === Subscription.FREE_TIER) {
       newPlan = Subscription.BASIC;
     }
@@ -283,22 +282,52 @@ export class CompanyService {
       subscriptionPlan: newPlan,
     });
 
-    return `successfully upgraded to ${newPlan}`
+    return `successfully upgraded to ${newPlan}`;
   }
 
-  async downgradePlan(companyId:string,newPlan:Subscription){
+  async downgradePlan(companyId: string, newPlan: Subscription) {
     const company = await this.companyModel.findById(companyId);
     if (!company) throw new NotFoundException('Company not found');
 
-    console.log(newPlan,"newPlan")
+    console.log(newPlan, 'newPlan');
 
-    if (company.subscriptionPlan !== Subscription.PREMIUM) {
-      throw new BadRequestException('Only Premium plans can downgrade');
+    if (
+      !['basic', 'free_tier', 'premium'].includes(newPlan.toLowerCase().trim())
+    ) {
+      throw new BadRequestException("Your provided subscription doesn't exist");
     }
 
-   
-    await this.companyModel.findByIdAndUpdate(companyId,{subscriptionPlan:newPlan})
- 
-    return ` succsessfully downgraded to ${newPlan}`
+
+    if (
+      company.subscriptionPlan === Subscription.FREE_TIER 
+    ) {
+      throw new BadRequestException(
+        'you arent able to downgrade subscription you are already free_tier'
+      );
+    }
+    if (
+      company.subscriptionPlan === Subscription.BASIC &&
+      newPlan.trim().toLowerCase() === 'free_tier' &&
+      company.employee.length >= 1
+    ) {
+      throw new BadRequestException(
+        'you arent able to downgrade subscription u have more than one employee',
+      );
+    }
+    if (
+      company.subscriptionPlan === Subscription.PREMIUM &&
+      newPlan.trim().toLowerCase() === 'basic' &&
+      company.employee.length >= 10 ||
+      company.file.length >= 100
+    ) {
+      throw new BadRequestException(
+        'you arent able to downgrade subscription u have more than 10 employee and more than 100 files',
+      );
+    }
+    await this.companyModel.findByIdAndUpdate(companyId, {
+      subscriptionPlan: newPlan,
+    });
+
+    return ` succsessfully downgraded to ${newPlan}`;
   }
 }

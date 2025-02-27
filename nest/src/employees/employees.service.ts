@@ -40,15 +40,11 @@ export class EmployeesService {
   }
 
   findAll() {
-    throw new BadRequestException(
-      'sorry, only company is able to see employees full list',
-    );
+    return this.employeeModel.find();
   }
 
   findOne(id: string) {
-    throw new BadRequestException(
-      'sorry, only company is able to see employees full list',
-    );
+    return this.employeeModel.findById(id);
   }
   async update(
     employeId: string,

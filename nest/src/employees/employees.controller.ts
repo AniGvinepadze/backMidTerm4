@@ -13,12 +13,14 @@ import { IsAuthGuard } from 'src/guards/auth.guard';
 import { Employees } from './employee.decorator';
 import { isVerified } from 'src/guards/isVerified.guard';
 
+
 @Controller('employees')
 @UseGuards(IsAuthGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get()
+  @UseGuards(IsAuthGuard)
   findAll() {
     return this.employeesService.findAll();
   }
@@ -28,13 +30,7 @@ export class EmployeesController {
     return this.employeesService.findOne(id);
   }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateEmployeeDto: UpdateEmployeeDto,
-  // ) {
-  //   return this.employeesService.update(id, updateEmployeeDto);
-  // }
+
 
   @Patch('update-employee/:id')
   @UseGuards(isVerified)

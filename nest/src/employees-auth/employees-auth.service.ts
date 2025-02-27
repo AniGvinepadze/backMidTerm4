@@ -8,6 +8,7 @@ import { Employee } from 'src/employees/schema/employee.schema';
 import { EmployeeSignUpDto } from './dto/employee-sign-up.dto';
 import * as bcrypt from 'bcrypt';
 import { EmployeeSignInDto } from './dto/employee-sign-in.dto';
+import { EmployeeVerifyDto } from './dto/employee-verify.dto';
 
 @Injectable()
 export class EmployeesAuthService {
@@ -17,21 +18,21 @@ export class EmployeesAuthService {
     private emailSender: EmailSenderService,
   ) {}
 
-  async signUp({ email, firstName, lastName, password }: EmployeeSignUpDto) {
+  async signUp({ email }: EmployeeSignUpDto) {
     const existEmployee = await this.employeeModel.findOne({ email });
     if (existEmployee)
       throw new BadRequestException('employee with this email already exists');
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
     const otpCode = Math.random().toString().slice(2, 8);
     const otpCodeValidateDate = new Date();
     otpCodeValidateDate.setTime(otpCodeValidateDate.getTime() + 3 * 60 * 1000);
 
     await this.employeeModel.create({
       email,
-      firstName,
-      lastName,
-      password: hashedPassword,
+      // firstName,
+      // lastName,
+      // password: hashedPassword,
       otpCode,
       otpCodeValidateDate,
     });
@@ -41,9 +42,14 @@ export class EmployeesAuthService {
     return 'Verify email';
   }
 
-  async verifyEmail(email, otpCode) {
+  async verifyEmail({
+    email,
+    firstName,
+    lastName,
+    otpCode,
+    password,
+  }: EmployeeVerifyDto) {
     const existEmployee = await this.employeeModel.findOne({ email });
-
     if (!existEmployee) throw new BadRequestException('employee not found');
 
     if (existEmployee.isVerified)
@@ -55,8 +61,19 @@ export class EmployeesAuthService {
     if (otpCode !== existEmployee.otpCode)
       throw new BadRequestException(' wrong otp code');
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+
     await this.employeeModel.findByIdAndUpdate(existEmployee._id, {
-      $set: { isVerified: true, otpCode: null, otpCodeValidateDate: null },
+      $set: {
+        firstName,
+        lastName,
+        email,
+        password:hashedPassword,
+        isVerified: true,
+        otpCode: null,
+        otpCodeValidateDate: null,
+      },
     });
 
     const payLoad = {
@@ -94,7 +111,7 @@ export class EmployeesAuthService {
     return 'check email';
   }
 
-  async signIn({ email, otpCode }: EmployeeSignInDto) {
+  async signIn({ email }: EmployeeSignInDto) {
     const existEmployee = await this.employeeModel.findOne({ email });
 
     if (!existEmployee)
